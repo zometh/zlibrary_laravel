@@ -25,9 +25,14 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|CommandeLivre whereQuantity($value)
  * @method static \Illuminate\Database\Eloquent\Builder|CommandeLivre whereUnitPrice($value)
  * @method static \Illuminate\Database\Eloquent\Builder|CommandeLivre whereUpdatedAt($value)
+ * @property-read \App\Models\Book $book
  * @mixin \Eloquent
  */
 class CommandeLivre extends Model
 {
     use HasFactory;
+    public function book()
+    {
+        return $this->belongsTo(Book::class);
+    }
 }

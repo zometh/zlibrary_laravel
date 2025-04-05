@@ -2,16 +2,20 @@
 <div class="min-h-screen bg-gray-50 ">
     <!-- Navigation (même que page d'accueil) -->
 
+    @php
+        $total_price = (int)$commande->total_amount;
+        $id_command = $commande->id.$commande->created_at->day.$commande->created_at->month.$commande->created_at->year;
+    @endphp
     <!-- Contenu détail commande -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <a href="{{route('user.commands')}}" class="text-indigo-600 hover:text-indigo-900 mb-4 inline-flex items-center">
+        <a href="@if(auth()->user()->hasRole('user')) {{route('user.commands')}} @else {{route('books.index')}}  @endif" class="text-indigo-600 hover:text-indigo-900 mb-4 inline-flex items-center">
             <svg class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
             Retour à mes commandes
         </a>
 
-        <h2 class="text-2xl font-bold text-gray-900 mb-4">Détail de la commande #12345</h2>
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">Détail de la commande #{{$id_command}}</h2>
 
         <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-6">
             <div class="px-4 py-5 sm:px-6">
@@ -21,61 +25,33 @@
                 <dl>
                     <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                         <dt class="text-sm font-medium text-gray-500">Numéro de commande</dt>
-                        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">#12345</dd>
+                        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">#{{$id_command}}</dd>
                     </div>
                     <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                         <dt class="text-sm font-medium text-gray-500">Date de commande</dt>
-                        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">5 mars 2025 à 14:35</dd>
+                        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">{{ \Carbon\Carbon::parse($commande->created_at)->translatedFormat('j F Y') }}</dd>
                     </div>
                     <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                         <dt class="text-sm font-medium text-gray-500">Statut</dt>
                         <dd class="mt-1 text-sm sm:col-span-2 sm:mt-0">
               <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
-                En préparation
+                {{$commande->statut}}
               </span>
                         </dd>
                     </div>
                     <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                         <dt class="text-sm font-medium text-gray-500">Total</dt>
-                        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">33,48€</dd>
+                        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">{{ $total_price }} FCFA</dd>
                     </div>
                     <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                         <dt class="text-sm font-medium text-gray-500">Mode de paiement</dt>
-                        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">Carte bancaire (•••• 4242)</dd>
+                        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">Espèce</dd>
                     </div>
                 </dl>
             </div>
         </div>
 
-        <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-6">
-            <div class="px-4 py-5 sm:px-6">
-                <h3 class="text-lg leading-6 font-medium text-gray-900">Livraison</h3>
-            </div>
-            <div class="border-t border-gray-200">
-                <dl>
-                    <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                        <dt class="text-sm font-medium text-gray-500">Destinataire</dt>
-                        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">Jean Dupont</dd>
-                    </div>
-                    <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                        <dt class="text-sm font-medium text-gray-500">Adresse</dt>
-                        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-                            123 rue des Lilas<br>
-                            75001 Paris<br>
-                            France
-                        </dd>
-                    </div>
-                    <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                        <dt class="text-sm font-medium text-gray-500">Téléphone</dt>
-                        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">+33 6 12 34 56 78</dd>
-                    </div>
-                    <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                        <dt class="text-sm font-medium text-gray-500">Mode de livraison</dt>
-                        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">Livraison standard (3-5 jours ouvrés)</dd>
-                    </div>
-                </dl>
-            </div>
-        </div>
+
 
         <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-6">
             <div class="px-4 py-5 sm:px-6">
@@ -101,72 +77,38 @@
                         </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
-                        <tr>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="flex items-center">
-                                    <div class="flex-shrink-0 h-10 w-10">
-                                        <img class="h-10 w-10 rounded-md" src="/api/placeholder/40/50" alt="Couverture du livre">
+                        @foreach($commande->commande_livre as $c)
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="flex-shrink-0 h-10 w-10">
+                                            <img class="h-10 w-10 rounded-md" src="/storage/{{$c->book->image}}" alt="Couverture du livre">
+                                        </div>
+                                        <div class="ml-4">
+                                            <div class="text-sm font-medium text-gray-900">{{ $c->book->title }}</div>
+                                            <div class="text-sm text-gray-500">{{ $c->book->author }}</div>
+                                        </div>
                                     </div>
-                                    <div class="ml-4">
-                                        <div class="text-sm font-medium text-gray-900">Le Comte de Monte-Cristo</div>
-                                        <div class="text-sm text-gray-500">Alexandre Dumas</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-500">
-                                15,99€
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-500">
-                                1
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                15,99€
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="flex items-center">
-                                    <div class="flex-shrink-0 h-10 w-10">
-                                        <img class="h-10 w-10 rounded-md" src="/api/placeholder/40/50" alt="Couverture du livre">
-                                    </div>
-                                    <div class="ml-4">
-                                        <div class="text-sm font-medium text-gray-900">L'Étranger</div>
-                                        <div class="text-sm text-gray-500">Albert Camus</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-500">
-                                12,50€
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-500">
-                                1
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                12,50€
-                            </td>
-                        </tr>
-                        <tr class="bg-gray-50">
-                            <td colspan="3" class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                Sous-total
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                28,49€
-                            </td>
-                        </tr>
-                        <tr class="bg-gray-50">
-                            <td colspan="3" class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                Frais de livraison
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                4,99€
-                            </td>
-                        </tr>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-500">
+                                    {{ $c->book->price }} FCFA
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-500">
+                                    {{ $c->quantity }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    {{ $c->unit_price * $c->quantity }} FCFA
+                                </td>
+                            </tr>
+                        @endforeach
+
+
                         <tr class="bg-gray-50">
                             <td colspan="3" class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                 Total
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-bold">
-                                33,48€
+                                {{$total_price}} FCFA
                             </td>
                         </tr>
                         </tbody>
@@ -176,7 +118,7 @@
         </div>
 
         <div class="flex justify-end">
-            <a href="#" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+            <a href="{{route('user.facture', $commande->id)}}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                 Télécharger la facture
             </a>
         </div>

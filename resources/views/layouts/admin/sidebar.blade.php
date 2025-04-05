@@ -27,35 +27,31 @@
                 </a>
             </li>
             <li>
-                <a href="#" class="{{$style}} hover:bg-indigo-700">
+                <a
+                    @class([$style, request()->route()->getName() == 'commande.index' ? 'bg-indigo-900' : ''])
+                    href="{{route('commande.index')}}">
                     <i class="fas fa-shopping-cart w-5 h-5 mr-3"></i>
                     <span>Commandes</span>
                 </a>
             </li>
             <li>
-                <a href="#" class="{{$style}} hover:bg-indigo-700">
+                <a
+                    @class([$style, request()->route()->getName() == 'admin.paiements' ? 'bg-indigo-900' : ''])
+                    href="{{route('admin.paiements')}}" >
                     <i class="fas fa-credit-card w-5 h-5 mr-3"></i>
                     <span>Paiements</span>
                 </a>
             </li>
             <li>
-                <a href="#" class="{{$style}} hover:bg-indigo-700">
+                <a
+                    @class([$style, request()->route()->getName() == 'admin.users' ? 'bg-indigo-900' : ''])
+                    href="{{route('admin.users')}}" >
                     <i class="fas fa-users w-5 h-5 mr-3"></i>
                     <span>Clients</span>
                 </a>
             </li>
-            <li>
-                <a href="#" class="{{$style}}hover:bg-indigo-700">
-                    <i class="fas fa-bell w-5 h-5 mr-3"></i>
-                    <span>Notifications</span>
-                </a>
-            </li>
-            <li>
-                <a href="#" class="{{$style}} hover:bg-indigo-700">
-                    <i class="fas fa-cog w-5 h-5 mr-3"></i>
-                    <span>Paramètres</span>
-                </a>
-            </li>
+
+
         </ul>
     </nav>
     <form action="{{ route('logout') }}" method="POST">

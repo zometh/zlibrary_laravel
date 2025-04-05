@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Requests\BooksRequest;
 use App\Models\Book;
 use App\Models\Category;
+use App\Models\Commande;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Storage;
@@ -17,9 +19,30 @@ class BookController extends Controller
     public function index()
     {
         $user = auth()->user();
+        Carbon::setLocale('fr');
+        $user = auth()->user();
+        $current_date = now()->toDateString();
+        $nb_commande = Commande::whereDate('created_at', $current_date)->count();
+        $total_montant = (int)Commande::whereDate('created_at', now()->toDateString())->sum('total_amount');
+        $validated_command = Commande::where('statut', '=', 'expédiée')->count();
+        $clients = \App\Models\User::all();
+        $nb_client = 0;
+        $recent_commands = Commande::all();
+        foreach ($clients as $client) {
+            if($client->hasRole('user')){
+                $nb_client++;
+            }
+        }
+
         return view('admin.index',
         [
-        'connected_user' => $user
+        'connected_user' => $user,
+
+            'daily_commande' => $nb_commande,
+            'daily_amount' => $total_montant,
+            'validated_command' => $validated_command,
+            'nb_client' => $nb_client,
+            'recent_commands' => $recent_commands
             ]
         );
     }

@@ -199,6 +199,7 @@
         document.getElementById('deleteModal').classList.add('hidden');
     }
 </script>
+</body>
 <!-- Charts JS --
 </body>
 </html>

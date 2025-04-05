@@ -72,6 +72,11 @@ class CartController extends Controller
 
         return redirect()->back()->with('success', 'Livre ajouté au panier !');
     }
+
+    /**
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     */
     public function decrement($id)
     {
         $cart = session()->get('cart', []);

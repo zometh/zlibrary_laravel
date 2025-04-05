@@ -27,9 +27,31 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|Commande whereTotalAmount($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Commande whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Commande whereUserId($value)
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\CommandeLivre> $commande_livre
+ * @property-read int|null $commande_livre_count
+ * @property-read \App\Models\User $user
  * @mixin \Eloquent
  */
 class Commande extends Model
 {
     use HasFactory;
+    protected $fillable = [
+        'user_id',
+        'total_amount',
+        'statut',
+        'date_paiement',
+        'moyen_paiement',
+    ];
+
+    protected $casts = [
+        'date_paiement' => 'datetime',
+    ];
+    public function commande_livre()
+    {
+        return $this->hasMany(CommandeLivre::class);
+    }
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

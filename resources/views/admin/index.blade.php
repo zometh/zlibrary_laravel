@@ -52,7 +52,7 @@
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-gray-500 text-sm">Commandes du jour</p>
-                            <h3 class="text-2xl font-bold text-gray-800">12</h3>
+                            <h3 class="text-2xl font-bold text-gray-800">{{$daily_commande}}</h3>
                         </div>
                         <div class="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-500">
                             <i class="fas fa-shopping-bag"></i>
@@ -70,7 +70,7 @@
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-gray-500 text-sm">Recette journalière</p>
-                            <h3 class="text-2xl font-bold text-gray-800">3 450 €</h3>
+                            <h3 class="text-2xl font-bold text-gray-800">{{$daily_amount}} FCFA</h3>
                         </div>
                         <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-500">
                             <i class="fas fa-euro-sign"></i>
@@ -87,8 +87,8 @@
                 <div class="bg-white rounded-lg shadow p-4">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-gray-500 text-sm">Livres vendus</p>
-                            <h3 class="text-2xl font-bold text-gray-800">27</h3>
+                            <p class="text-gray-500 text-sm">Commande validées aujourd'hui</p>
+                            <h3 class="text-2xl font-bold text-gray-800">{{$validated_command}}</h3>
                         </div>
                         <div class="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-500">
                             <i class="fas fa-book"></i>
@@ -105,8 +105,8 @@
                 <div class="bg-white rounded-lg shadow p-4">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-gray-500 text-sm">Nouveaux clients</p>
-                            <h3 class="text-2xl font-bold text-gray-800">5</h3>
+                            <p class="text-gray-500 text-sm">Nombre total de clients</p>
+                            <h3 class="text-2xl font-bold text-gray-800">{{$nb_client}}</h3>
                         </div>
                         <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-500">
                             <i class="fas fa-user-plus"></i>
@@ -154,7 +154,7 @@
             <div class="bg-white rounded-lg shadow overflow-hidden mb-6">
                 <div class="flex justify-between items-center p-4 border-b">
                     <h4 class="text-lg font-semibold text-gray-800">Commandes récentes</h4>
-                    <a href="#" class="text-indigo-600 hover:text-indigo-800 text-sm">Voir toutes</a>
+
                 </div>
 
                 <div class="overflow-x-auto">
@@ -182,230 +182,94 @@
                         </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
+                     @foreach($recent_commands as $c)
                         <tr>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-medium text-gray-900">#CMD-1234</div>
+                                <div class="text-sm font-medium text-gray-900">#{{$c->id.$c->created_at->day.$c->created_at->month.$c->created_at->year}}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">Sophie Martin</div>
+                                <div class="text-sm text-gray-900">{{ strtoupper($c->user->name) }}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-500">01/04/2025 09:45</div>
+                                <div class="text-sm text-gray-500">{{ \Carbon\Carbon::parse($c->created_at)->translatedFormat('j F Y à H:i') }}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">54,90 €</div>
+                                <div class="text-sm text-gray-900">{{ $c->total_amount }} FCFA</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                         <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                                            En préparation
+                                            {{ $c->statut }}
                                         </span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 <a href="#" class="text-indigo-600 hover:text-indigo-900 mr-3">Détails</a>
-                                <a href="#" class="text-green-600 hover:text-green-900">Modifier</a>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <button onclick="openModal({{ $c->id }}, '{{ $c->statut }}')"
+                                        class="text-green-600 hover:text-indigo-900 mr-3">
+                                    Modifier
+                                </button>
+                                <div id="statusModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
+                                    <div class="bg-white p-6 rounded-lg shadow-lg w-96">
+                                        <h2 class="text-xl font-bold mb-4">Modifier le statut</h2>
+                                        <form method="post" action="{{route('commande.update-status', $c->id)}}">
+                                            @csrf
+                                            <!-- Sélection du statut -->
+                                            <select id="statusSelect" class="w-full p-2 border rounded" name="statut">
+                                                @foreach(['en attente', 'en préparation', 'expédiée', 'payée'] as $status)
+                                                    <option value="{{ $status }}">{{ ucfirst($status) }}</option>
+                                                @endforeach
+                                            </select>
+
+                                            <!-- Boutons -->
+                                            <div class="mt-4 flex justify-end">
+                                                <button onclick="closeModal()" class="px-4 py-2 bg-gray-500 text-white rounded mr-2">
+                                                    Annuler
+                                                </button>
+                                                <button type="submit" id="saveStatusBtn" class="px-4 py-2 bg-green-500 text-white rounded">
+                                                    Enregistrer
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+
+                            </td>
+
                             </td>
                         </tr>
-                        <tr>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-medium text-gray-900">#CMD-1233</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">Jean Dupont</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-500">01/04/2025 08:32</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">98,50 €</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                            Expédiée
-                                        </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <a href="#" class="text-indigo-600 hover:text-indigo-900 mr-3">Détails</a>
-                                <a href="#" class="text-green-600 hover:text-green-900">Modifier</a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-medium text-gray-900">#CMD-1232</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">Marie Petit</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-500">01/04/2025 07:15</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">32,00 €</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                                            Payée
-                                        </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <a href="#" class="text-indigo-600 hover:text-indigo-900 mr-3">Détails</a>
-                                <a href="#" class="text-green-600 hover:text-green-900">Modifier</a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-medium text-gray-900">#CMD-1231</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">Thomas Bernard</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-500">31/03/2025 22:10</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">125,75 €</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
-                                            En attente
-                                        </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <a href="#" class="text-indigo-600 hover:text-indigo-900 mr-3">Détails</a>
-                                <a href="#" class="text-green-600 hover:text-green-900">Modifier</a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-medium text-gray-900">#CMD-1230</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">Laura Dubois</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-500">31/03/2025 19:22</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">76,20 €</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
-                                            Annulée
-                                        </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <a href="#" class="text-indigo-600 hover:text-indigo-900 mr-3">Détails</a>
-                                <a href="#" class="text-green-600 hover:text-green-900">Modifier</a>
-                            </td>
-                        </tr>
+                        @endforeach
+
+
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- Low Stock Books Alert -->
-            <div class="bg-white rounded-lg shadow overflow-hidden">
-                <div class="flex justify-between items-center p-4 border-b">
-                    <h4 class="text-lg font-semibold text-gray-800">Alerte Stock Faible</h4>
-                    <a href="#" class="text-indigo-600 hover:text-indigo-800 text-sm">Gérer les stocks</a>
-                </div>
-
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Livre
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Auteur
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Catégorie
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Stock
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Actions
-                            </th>
-                        </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
-                        <tr>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="flex items-center">
-                                    <div class="flex-shrink-0 h-10 w-10 bg-gray-200 rounded"></div>
-                                    <div class="ml-4">
-                                        <div class="text-sm font-medium text-gray-900">L'Art de la Guerre</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">Sun Tzu</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">Stratégie</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-red-600 font-semibold">2</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <a href="#" class="text-indigo-600 hover:text-indigo-900">Commander</a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="flex items-center">
-                                    <div class="flex-shrink-0 h-10 w-10 bg-gray-200 rounded"></div>
-                                    <div class="ml-4">
-                                        <div class="text-sm font-medium text-gray-900">1984</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">George Orwell</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">Science-Fiction</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-red-600 font-semibold">3</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <a href="#" class="text-indigo-600 hover:text-indigo-900">Commander</a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="flex items-center">
-                                    <div class="flex-shrink-0 h-10 w-10 bg-gray-200 rounded"></div>
-                                    <div class="ml-4">
-                                        <div class="text-sm font-medium text-gray-900">Le Petit Prince</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">Antoine de Saint-Exupéry</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">Littérature</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-orange-600 font-semibold">5</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <a href="#" class="text-indigo-600 hover:text-indigo-900">Commander</a>
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
         </main>
     </div>
 </div>
 
-<!-- Charts JS -->
+<script>
+    let selectedCommandeId = null;
+
+    function openModal(commandeId, currentStatus) {
+        selectedCommandeId = commandeId;
+        document.getElementById("statusSelect").value = currentStatus;
+        document.getElementById("statusModal").classList.remove("hidden");
+    }
+
+    function closeModal() {
+        document.getElementById("statusModal").classList.add("hidden");
+    }
+
+    // Tu peux ajouter ta propre logique pour gérer la modification ici
+    document.getElementById("saveStatusBtn").addEventListener("click", function() {
+        let newStatus = document.getElementById("statusSelect").value;
+        console.log("Commande ID:", selectedCommandeId, "Nouveau statut:", newStatus);
+        closeModal();
+    });
+</script>
+
 <script>
     // Orders Chart
     const ordersCtx = document.getElementById('ordersChart').getContext('2d');
